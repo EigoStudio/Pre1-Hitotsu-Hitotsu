@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>英検準1級をひとつひとつわかりやすく。2章 名詞</title>
+    <style>
+        :root {
+            --bg-color: #f7f9fc;
+            --primary-navy: #2c3e50;
+            --accent-orange: #e67e22;
+            --text-dark: #34495e;
+            --white: #ffffff;
+            --error-red: #e74c3c;
+            --success-green: #27ae60;
+            --base-font: "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
+        }
+
+        body { font-family: var(--base-font); background-color: var(--bg-color); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        header { background-color: var(--primary-navy); color: white; width: 100%; padding: 15px 0; text-align: center; }
+        
+        .tabs { display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; justify-content: center; padding: 0 10px; }
+        .tab-btn { padding: 8px 12px; border: none; background: #bdc3c7; cursor: pointer; border-radius: 5px 5px 0 0; font-weight: bold; font-size: 0.85rem; }
+        .tab-btn.active { background: var(--white); color: var(--primary-navy); border-top: 3px solid var(--accent-orange); }
+
+        .container { max-width: 750px; width: 95%; background: var(--white); padding: 25px; border-radius: 0 0 20px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; margin-bottom: 40px; }
+        .hidden { display: none; }
+
+        .word-display-area { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 15px 0; }
+        .word-display { font-size: 1.6rem; font-weight: bold; color: var(--primary-navy); line-height: 1.5; }
+        .left-align { text-align: left; font-size: 1.1rem; padding: 0 15px; font-weight: normal; }
+        
+        .speaker-btn { background: #e1f5fe; border: 2px solid #03a9f4; color: #03a9f4; font-size: 1.2rem; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+        .speaker-btn:hover { background: #03a9f4; color: white; }
+
+        .instruction { font-size: 0.9rem; color: #7f8c8d; margin-bottom: 10px; }
+        input[type="text"] { font-size: 1.3rem; padding: 12px; width: 85%; border: 2px solid #bdc3c7; border-radius: 8px; text-align: center; margin-bottom: 10px; }
+        
+        .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .choice-btn { background: var(--white); border: 2px solid #bdc3c7; padding: 12px 5px; border-radius: 10px; font-size: 0.9rem; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .choice-btn.correct { background: var(--success-green) !important; color: white; border-color: var(--success-green); }
+        .choice-btn.wrong { background: var(--error-red) !important; color: white; border-color: var(--error-red); }
+        
+        .action-btn { background: var(--primary-navy); color: white; border: none; padding: 15px; border-radius: 30px; cursor: pointer; margin-top: 15px; width: 100%; font-weight: bold; }
+        .feedback-box { margin-top: 15px; padding: 15px; border-radius: 10px; background: #f1f8e9; text-align: left; font-size: 0.95rem; line-height: 1.4; border-left: 5px solid var(--success-green); }
+        .trans-box { margin-top: 10px; font-size: 1rem; color: var(--accent-orange); font-weight: bold; background: #fff3e0; padding: 10px; border-radius: 8px; }
+
+        @media print {
+            header, .tabs, .action-btn, .speaker-btn, #q-feedback, .choices-grid, #progress, .no-print, button { display: none !important; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .print-only { display: block !important; }
+            .worksheet-item { text-align: left; margin-bottom: 30px; border-bottom: 0px dotted #ccc; padding-bottom: 0px; line-height: 1.5; }
+            .blank-line { display: inline-block; border-bottom: 1.5px solid #000; width: 320px; margin: 0 10px; vertical-align: bottom; }
+        }
+    </style>
+</head>
+<body>
+
+<header><h1>英検準1級をひとつひとつわかりやすく。2章 名詞</h1></header>
+
+<div class="tabs no-print">
+    <button class="tab-btn active" onclick="showPart(1)">Part 1: 派生</button>
+    <button class="tab-btn" onclick="showPart(2)">Part 2: 接辞</button>
+    <button class="tab-btn" onclick="showPart(3)">Part 3: 語彙</button>
+    <button class="tab-btn" onclick="showPart(4)">Part 4: 穴埋</button>
+    <button class="tab-btn" onclick="showPart(5)">Part 5: 復習</button>
+</div>
+
+<div id="input-container" class="container part-content no-print">
+    <div id="in-progress" class="instruction"></div>
+    <p class="instruction">名詞形を入力しなさい。</p>
+    <div id="in-q" class="word-display"></div>
+    <input type="text" id="in-box" placeholder="Type answer..." autocomplete="off">
+    <div id="in-trans-box" class="trans-box hidden"></div>
+    <div id="in-feedback" style="margin-top:10px; font-weight:bold;"></div>
+    <button class="action-btn" id="in-check-btn" onclick="checkInput()">Check Answer</button>
+    <button class="action-btn hidden" id="in-next-btn" onclick="handleNext()">Next Question</button>
+    <button class="action-btn" style="background:#7f8c8d" onclick="toggleInTrans()">Translation</button>
+</div>
+
+<div id="choice-container" class="container part-content hidden no-print">
+    <div id="ch-progress" class="instruction"></div>
+    <div class="word-display-area">
+        <div id="ch-q" class="word-display"></div>
+        <button id="spk-btn" class="speaker-btn" onclick="speakCurrentWord()">🔊</button>
+    </div>
+    <div id="ch-choices" class="choices-grid"></div>
+    <div id="q-feedback" class="feedback-box hidden"></div>
+    <button id="ch-next-btn" class="action-btn hidden" onclick="handleNext()">Next Question</button>
+</div>
+
+<div id="result-screen" class="container hidden no-print">
+    <h2>完了！</h2>
+    <p>スコア: <span id="final-score" style="font-size:2.5rem; color:var(--accent-orange);"></span></p>
+    <button class="action-btn" onclick="sendEmail()">Tamaki先生に報告</button>
+    <button class="action-btn" style="background:#7f8c8d" onclick="location.reload()">Reset</button>
+</div>
+
+<div id="worksheet" class="container print-only hidden">
+    <h2>英検準1級をひとつひとつわかりやすく。2章 名詞</h2>
+    <div id="ws-content"></div>
+</div>
+
+<script>
+const p1Data = [
+    {q:"mobile", a:"mobility", t:"流動性、可動性"}, {q:"cruel", a:"cruelty", t:"残酷さ"},
+    {q:"sensitive", a:"sensitivity", t:"感度、感受性"}, {q:"absent", a:"absence", t:"不在、欠席"},
+    {q:"arrogant", a:"arrogance", t:"傲慢さ"}, {q:"disturb", a:"disturbance", t:"騒動、動揺"},
+    {q:"conspire", a:"conspiracy", t:"陰謀、共謀"}, {q:"urgent", a:"urgency", t:"緊急性"},
+    {q:"descend", a:"descendant", t:"子孫"}, {q:"pollute", a:"pollutant", t:"汚染物質"},
+    {q:"oppose", a:"opponent", t:"反対者、敵対者"}, {q:"apprehend", a:"apprehension", t:"強い不安、懸念"},
+    {q:"adopt", a:"adoption", t:"採用、養子縁組"}, {q:"oblige", a:"obligation", t:"義務、法的拘束力"},
+    {q:"evacuate", a:"evacuation", t:"避難、撤去、排泄"}, {q:"allocate", a:"allocation", t:"配分、割り当て"}
+];
+
+const p2Data = [
+    {q:"ant(i)-", a:"反対、対抗", c:["以前、前方","悪い、不完全","下、副"], ex:"antidote (解毒剤), Antarctica (南極), antisocial (反社会的な)"},
+    {q:"mal-", a:"悪い、不完全", c:["共同、共に","反対","離れて"], ex:"malfunction (不具合), malnutrition (栄養失調), malice (悪意)"},
+    {q:"sub-", a:"下、副、潜在的", c:["頭、主要","再び","以前"], ex:"substitute (代用品), subconscious (潜在意識), subway (地下鉄)"},
+    {q:"cap-", a:"頭、主要、首", c:["悪い","以前","共に"], ex:"capital (首都), captain (船長), capacity (収容能力)"},
+    {q:"pre-", a:"以前、あらかじめ", c:["後で","悪い","共同"], ex:"preview (下見), preschool (幼稚園), predict (予言する)"},
+    {q:"co- / com-", a:"共に、共同", c:["反対","以前","悪い"], ex:"cooperate (協力する), combination (組み合わせ), compact (密集した)"},
+    {q:"re-", a:"再び、戻って", c:["決して〜ない","以前","主要な"], ex:"reprise (反復), return (戻る), recycle (再利用する)"},
+    {q:"mis-", a:"誤って、悪く", c:["下に","以前","主要な"], ex:"mistake (間違い), misunderstand (誤解する), misfortune (不幸)"},
+    {q:"ex-", a:"外へ、以前の", c:["中に","下に","共に"], ex:"exile (国外追放), extension (延長), exit (出口)"},
+    {q:"trans-", a:"越えて、移す", c:["反対","下","悪い"], ex:"translation (翻訳), transfer (移籍), transport (輸送する)"},
+    {q:"de-", a:"低下、分離、反対", c:["上昇、増加","内部、中心","共同、一致"], ex:"decline (衰退), depart (出発する), decrease (減少する)"}
+];
+
+const p3Data = [
+    {q:"mobility", a:"流動性、可動性", c:["固定静止","義務義務","不具合不全"]}, {q:"cruelty", a:"残酷さ", c:["慈悲慈悲","配分額","採用数"]},
+    {q:"sensitivity", a:"感度、感受性", c:["無感覚","不在届","傲慢さ"]}, {q:"absence", a:"不在、欠席", c:["出席存在","採用選択","騒動混乱"]},
+    {q:"arrogance", a:"傲慢さ", c:["謙虚な心","緊急事態","残酷行為"]}, {q:"disturbance", a:"騒動、動揺", c:["平和状態","採用手続","配分計画"]},
+    {q:"conspiracy", a:"陰謀、共謀", c:["協力体制","詳細説明","避難勧告"]}, {q:"urgency", a:"緊急性", c:["感受性高","不在通知","配分予定"]},
+    {q:"descendant", a:"子孫、末裔", c:["先祖祖先","敵対反対","汚染不潔"]}, {q:"pollutant", a:"汚染物質", c:["浄化装置","子孫末裔","陰謀共謀"]},
+    {q:"opponent", a:"反対者、敵対者", c:["支持賛成","部下下位","管財評議"]}, {q:"apprehension", a:"強い不安、懸念", c:["自信満々","採用決定","配分完了"]},
+    {q:"adoption", a:"採用、養子縁組", c:["拒絶、離脱","不在、欠席","騒動、混乱"]}, {q:"obligation", a:"義務、法的拘束力", c:["権利、特権","陰謀、共謀","不安、懸念"]},
+    {q:"evacuation", a:"避難、撤去", c:["侵入、攻撃","配分、割当","傲慢、不遜"]}, {q:"allocation", a:"配分、割り当て", c:["収集、蓄積","残酷、冷酷","感度、感受"]},
+    {q:"fascination", a:"魅力、強い興味", c:["嫌悪、拒絶","退屈、倦怠","恐怖、戦慄"]}, {q:"salutation", a:"あいさつの言葉", c:["別れの挨拶","沈黙の合図","謝罪の言葉"]},
+    {q:"permutation", a:"配列、並べ替え", c:["固定、静止","消去、削除","合計、総計"]}, {q:"pretense", a:"虚偽、装い", c:["真実、事実","誠実、謙虚","確信、信念"]},
+    {q:"exile", a:"国外追放者", c:["定住居住","部下下位","子孫末裔"]}, {q:"guise", a:"装い、外見", c:["本性内面","地形地勢","欠陥不備"]},
+    {q:"detractor", a:"中傷する人", c:["支持賛成","評議管財","部下下位"]}, {q:"subordinate", a:"部下、下位の人", c:["上官上司","強敵宿敵","子孫末裔"]},
+    {q:"trustee", a:"管財人、評議員", c:["容疑被告","部下下位","中傷批判"]}, {q:"terrain", a:"地形、地勢", c:["天候気象","言語方言","海洋海流"]},
+    {q:"elevation", a:"標高、高台", c:["低地盆地","平野草原","海岸砂浜"]}, {q:"outcast", a:"捨てられたもの", c:["人気寵児","指導統率","部下下位"]},
+    {q:"flaw", a:"欠陥、不備", c:["完璧完全","長所美点","成功達成"]}, {q:"reprise", a:"楽曲の反復", c:["即興演奏","沈黙静寂","序曲前奏"]},
+    {q:"hymn", a:"賛美歌、聖歌", c:["流行歌謡","叫び怒鳴","合図信号"]}, {q:"mantra", a:"真言、マントラ", c:["冗談洒落","虚偽偽り","解説説明"]},
+    {q:"anthem", a:"国歌、祝歌", c:["演説スピーチ","対話ダイアログ","喧嘩トラブル"]}, {q:"invoice", a:"送り状、請求書", c:["日記日誌","地図案内","切符乗車"]},
+    {q:"debit", a:"借方、帳簿マイナス", c:["利益プラス","貯金残高","配当ボーナス"]}, {q:"slum", a:"スラム街", c:["高級住宅街","公園広場","市役所官庁"]},
+    {q:"glimpse", a:"ちらりと見ること", c:["凝視注目","暗闇暗黒","消失紛失"]}, {q:"snatch", a:"断片、ひったくり", c:["全体全貌","継続連続","完成完了"]},
+    {q:"pointer", a:"助言、ヒント", c:["障害の壁","妨害邪魔","批判非難"]}, {q:"highlight", a:"主要な部分", c:["背景遠景","影シャドウ","底部ベース"]},
+    {q:"accountant", a:"会計係、会計士", c:["弁護法律","医師医療","運転操縦"]}, {q:"catalogue", a:"カタログ、目録", c:["チラシ広告","壁紙クロス","看板標識"]},
+    {q:"yield", a:"収穫量、産出", c:["不足欠乏","損失損害","種子苗木"]}, {q:"cashflow", a:"資金の流れ", c:["利益率高","負債総額","在庫管理"]},
+    {q:"business", a:"商売、業務", c:["余暇遊び","休息睡眠","移動旅行"]}, {q:"remains", a:"残り、遺骸", c:["始まり起点","変化変容","移動遷移"]},
+    {q:"crops", a:"作物、農産物", c:["雑草芝生","石岩石","土土壌"]}, {q:"harvest", a:"収穫、刈り入れ", c:["種まき播種","耕作農耕","肥料追肥"]},
+    {q:"antidote", a:"解毒剤、対策", c:["毒素病毒","感染伝染","診断処方"]}
+];
+
+const p4Data = [
+    { q: "My accountant is very good at managing all my business ( ). This ensures that customers pay me on time and that my cashflow remains stable.", a: "invoices", c: ["highlights","debits","sweeps"] },
+    { q: "There were a few problems with the supply lines. This meant we were unable to ( ) all of our forces at the same time.", a: "deploy", c: ["slum","implement","characterize"] },
+    { q: "The policy of this school is designed to be very ( ). Everyone should have the opportunity to learn and participate in all activities.", a: "inclusive", c: ["exclusive","intrusive","abusive"] },
+    { q: "A: What was their response when we asked for a preview of next year's catalogue?<br>B: They didn't want us to see the whole thing and only gave us a ( ) of some of the items.", a: "glimpse", c: ["pointer","snatch","breakout"] },
+    { q: "I have noted that your exam was only ( ) complete because you only answered five of the seven questions.", a: "partially", c: ["totally","successfully","openly"] },
+    { q: "After these heavy rains, it was important to give the crops a chance to ( ) before commencing the harvest. Otherwise, the yield would suffer.", a: "dry up", c: ["pull over","get along","pass off"] },
+    { q: "I don't know what the ( ) with this computer game is, but people cannot stop playing it!", a: "fascination", c: ["allocation","salutation","permutation"] },
+    { q: "The defendant presented herself under false ( ) and was able to gain access to the building under that guise.", a: "pretenses", c: ["creations","extensions","exiles"] },
+    { q: "Having people work under me taught me many managerial skills. I believe I also helped my ( ) to develop their careers.", a: "subordinates", c: ["detractors","trustees","candidates"] },
+    { q: "A: I have completed a survey of the area. The steep terrain made the process quite difficult.<br>B: You have done a good job. Knowing the exact ( ) is critical for our success.", a: "elevation", c: ["perception","combination","designation"] },
+    { q: "There was a fatal ( ) in the plan that led to the failure of the entire mission.", a: "flaw", c: ["hymn","mantra","glimpse"] },
+    { q: "Standing on the winners' podium and listening to the national ( ) was the proudest moment of his life.", a: "anthem", c: ["permutation","apprehension","disturbance"] },
+    { q: "The ( ) of the new technology was met with some resistance from the older staff members.", a: "adoption", c: ["allocation","evacuation","conspiracy"] },
+    { q: "There is an ( ) to solve the issue of climate change before it is too late.", a: "urgency", c: ["cruelty","sensitivity","absence"] },
+    { q: "The city council voted for the ( ) of funds for the construction of a new public park.", a: "allocation", c: ["disturbance","arrogance","obligation"] },
+    { q: "The police discovered a ( ) to overthrow the local government and arrested several individuals.", a: "conspiracy", c: ["salutation","permutation","mobility"] },
+    { q: "A massive ( ) was carried out after the volcano erupted to save thousands of residents.", a: "evacuation", c: ["allocation","adoption","arrogance"] },
+    { q: "Living in a ( ) can be very challenging due to the lack of basic services and poor housing conditions.", a: "slum", c: ["terrain","podium","elevation"] },
+    { q: "Scientists are concerned about the effects of this new ( ) on the local wildlife population.", a: "pollutant", c: ["descendant","opponent","accountant"] },
+    { q: "Despite being a ( ) of a royal family, she lived a very simple and humble life.", a: "descendant", c: ["detractor","trustee","accountant"] },
+    { q: "The politician faced a tough ( ) during the debate who questioned every single one of his policies.", a: "opponent", c: ["subordinate","trustee","accountant"] },
+    { q: "He felt a deep sense of ( ) about the future of the company after the recent economic downturn.", a: "apprehension", c: ["adoption","allocation","arrogance"] },
+    { q: "She had a legal ( ) to provide the court with all the documents related to the case.", a: "obligation", c: ["conspiracy","arrogance","urgency"] },
+    { q: "The ( ) of the loud music kept all the neighbors awake until the early hours of the morning.", a: "disturbance", c: ["adoption","allocation","elevation"] },
+    { q: "She gave the visitors a ( ) of the future of the museum with her detailed presentation.", a: "glimpse", c: ["debit","invoice","slum"] },
+    { q: "He provided several useful ( ) for anyone looking to start their own online business.", a: "pointers", c: ["invoices","debits","slums"] },
+    { q: "I could only hear a ( ) of their conversation as I walked past their office, so I didn't get the full story.", a: "snatch", c: ["highlight","debit","invoice"] },
+    { q: "The ( ) of this year's harvest was much higher than anyone had originally expected.", a: "yield", c: ["slum","glimpse","catalogue"] },
+    { q: "The government is implementing new educational programs to promote social ( ), allowing individuals to succeed.", a: "mobility", c: ["cruelty","sensitivity","absence"] },
+    { q: "The business consultant analyzed the ( ) to determine the financial health of the firm.", a: "cashflow", c: ["highlight","debit","invoice"] }
+];
+
+const p5Extra = [
+    {q:"inclusive", a:"包括的な、全員を含めた", c:["排他的な","押しつけがましい","口汚い"]},
+    {q:"exclusive", a:"排他的な、限定的な", c:["包括的な","押しつけがましい","虐待的な"]},
+    {q:"intrusive", a:"押しつけがましい、邪魔な", c:["包括的な","控えめな","魅力的な"]},
+    {q:"abusive", a:"口汚い、虐待的な", c:["礼儀正しい","包括的な","緊急の"]},
+    {q:"deploy", a:"配置する、展開する", c:["撤去する","採用する","説明する"]},
+    {q:"invoice", a:"請求書、送り状", c:["借方","名簿","目録"]}
+];
+const p5Data = [...p3Data, ...p5Extra].sort(() => Math.random() - 0.5);
+
+// --- Logic ---
+let curP = 1, curI = 0, score = 0, curL = [], ansd = false;
+
+function speak(txt) {
+    window.speechSynthesis.cancel();
+    let u = new SpeechSynthesisUtterance(txt);
+    u.lang = "en-US"; u.rate = 0.8;
+    window.speechSynthesis.speak(u);
+}
+
+function speakCurrentWord() {
+    if (curL[curI]) {
+        let text = (curP === 4) ? curL[curI].a : curL[curI].q;
+        speak(text);
+    }
+}
+
+function showPart(p) {
+    curP = p; curI = 0; score = 0;
+    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === p-1));
+    document.querySelectorAll('.part-content').forEach(c => c.classList.add('hidden'));
+    curL = [null, p1Data, p2Data, p3Data, p4Data, p5Data][p];
+    
+    if (p === 1) { 
+        document.getElementById('input-container').classList.remove('hidden'); 
+        loadIn(); 
+    } else { 
+        document.getElementById('choice-container').classList.remove('hidden'); 
+        document.getElementById('spk-btn').style.display = (p >= 3) ? "flex" : "none";
+        loadCh(); 
+    }
+}
+
+function loadIn() {
+    ansd = false; const d = curL[curI];
+    document.getElementById('in-progress').innerText = `${curI + 1} / ${curL.length}`;
+    document.getElementById('in-q').innerText = d.q;
+    document.getElementById('in-box').value = ""; document.getElementById('in-box').disabled = false;
+    document.getElementById('in-trans-box').classList.add('hidden');
+    document.getElementById('in-feedback').innerText = "";
+    document.getElementById('in-check-btn').classList.remove('hidden');
+    document.getElementById('in-next-btn').classList.add('hidden');
+    document.getElementById('in-box').focus();
+}
+
+function checkInput() {
+    const v = document.getElementById('in-box').value.trim().toLowerCase();
+    if (v === curL[curI].a.toLowerCase()) {
+        score++; ansd = true;
+        document.getElementById('in-feedback').innerHTML = "<span style='color:var(--success-green)'>Correct! ✨</span>";
+        document.getElementById('in-box').disabled = true;
+        document.getElementById('in-check-btn').classList.add('hidden');
+        document.getElementById('in-next-btn').classList.remove('hidden');
+    } else { document.getElementById('in-feedback').innerHTML = "<span style='color:var(--error-red)'>Try Again!</span>"; }
+}
+
+function loadCh() {
+    ansd = false; const d = curL[curI];
+    document.getElementById('ch-progress').innerText = `${curI + 1} / ${curL.length}`;
+    const qDisp = document.getElementById('ch-q');
+    if (curP === 4) {
+        qDisp.classList.add('left-align');
+        qDisp.innerHTML = `<b>Question:</b><br>${d.q}`;
+    } else {
+        qDisp.classList.remove('left-align');
+        qDisp.innerHTML = d.q;
+    }
+    document.getElementById('q-feedback').classList.add('hidden');
+    document.getElementById('ch-next-btn').classList.add('hidden');
+    const cont = document.getElementById('ch-choices'); cont.innerHTML = "";
+    const choices = [d.a, ...d.c].sort(() => Math.random() - 0.5);
+    choices.forEach(c => {
+        const btn = document.createElement('button'); btn.className = "choice-btn"; btn.innerText = c;
+        btn.onclick = () => {
+            if (ansd) return; ansd = true;
+            if (c === d.a) {
+                btn.classList.add('correct'); score++;
+                let fb = "<b>Correct! ✨</b>";
+                if (curP === 2) fb += `<br>例: ${d.ex}`;
+                document.getElementById('q-feedback').innerHTML = fb;
+                if (curP === 4) qDisp.innerHTML = `<b>Question:</b><br>${d.q.replace("( )", `<span style="color:var(--success-green); text-decoration: underline;">(${d.a})</span>`)}`;
+            } else { 
+                btn.classList.add('wrong'); 
+                document.getElementById('q-feedback').innerHTML = `<span style='color:var(--error-red)'>Incorrect. 正解: ${d.a}</span>`; 
+            }
+            document.getElementById('q-feedback').classList.remove('hidden');
+            document.getElementById('ch-next-btn').classList.remove('hidden');
+        };
+        cont.appendChild(btn);
+    });
+}
+
+function handleNext() {
+    curI++; if (curI < curL.length) { if (curP === 1) loadIn(); else loadCh(); } else { showRes(); }
+}
+
+function toggleInTrans() { document.getElementById('in-trans-box').innerText = curL[curI].t; document.getElementById('in-trans-box').classList.toggle('hidden'); }
+
+function showRes() {
+    document.querySelectorAll('.part-content').forEach(c => c.classList.add('hidden'));
+    document.getElementById('result-screen').classList.remove('hidden');
+    document.getElementById('final-score').innerText = score;
+}
+
+function sendEmail() {
+    const email = "tamaki@eigostudio-stepforward.com";
+    const sub = encodeURIComponent(`英検準1級をひとつひとつわかりやすく。2章 名詞 Part${curP} 結果報告`);
+    const body = encodeURIComponent(`Part: ${curP}\nScore: ${score} / ${curL.length}\n全問やり切りました！`);
+    window.location.href = `mailto:${email}?subject=${sub}&body=${body}`;
+}
+
+window.onbeforeprint = () => {
+    const ws = document.getElementById('ws-content'); ws.innerHTML = "";
+    const h1 = document.createElement('h3'); h1.innerText = "■ Part 1: Derivative Nouns (名詞形を書きなさい)"; ws.appendChild(h1);
+    p1Data.forEach((d, i) => {
+        const div = document.createElement('div'); div.className="worksheet-item";
+        div.innerHTML = `${i+1}. ${d.q} → <span class="blank-line"></span> (${d.t})`; ws.appendChild(div);
+    });
+    const h4 = document.createElement('h3'); h4.innerText = "■ Part 4: Sentence Completion (空欄を埋めなさい)"; ws.appendChild(h4);
+    p4Data.forEach((d, i) => {
+        const div = document.createElement('div'); div.className="worksheet-item";
+        div.innerHTML = `${i+1}. ${d.q.replace("( )", "________________________________")}<br>Choices: [ ${[d.a, ...d.c].join(", ")} ]`; ws.appendChild(div);
+    });
+};
+
+window.onload = () => showPart(1);
+</script>
+</body>
+</html>
