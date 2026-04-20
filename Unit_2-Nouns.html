@@ -43,14 +43,17 @@
         
         .action-btn { background: var(--primary-navy); color: white; border: none; padding: 15px; border-radius: 30px; cursor: pointer; margin-top: 15px; width: 100%; font-weight: bold; }
         .feedback-box { margin-top: 15px; padding: 15px; border-radius: 10px; background: #f1f8e9; text-align: left; font-size: 0.95rem; line-height: 1.4; border-left: 5px solid var(--success-green); }
-        .trans-box { margin-top: 10px; font-size: 1rem; color: var(--accent-orange); font-weight: bold; background: #fff3e0; padding: 10px; border-radius: 8px; }
+        .trans-box { margin-top: 10px; font-size: 1rem; color: var(--accent-orange); font-weight: bold; background: #fff3e0; padding: 10px; border-radius: 8px; text-align: center; }
 
+        /* 印刷用設定（PDF出力） */
         @media print {
             header, .tabs, .action-btn, .speaker-btn, #q-feedback, .choices-grid, #progress, .no-print, button { display: none !important; }
-            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            body { background: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 5; margin: 5; }
             .print-only { display: block !important; }
-            .worksheet-item { text-align: left; margin-bottom: 30px; border-bottom: 0px dotted #ccc; padding-bottom: 0px; line-height: 1.5; }
-            .blank-line { display: inline-block; border-bottom: 1.5px solid #000; width: 320px; margin: 0 10px; vertical-align: bottom; }
+            .worksheet-item { text-align: left; margin-bottom: 20px; border-bottom: none; padding-bottom: 0; line-height: 1.7; font-size: 1.0rem; }
+            .blank-line { display: inline-block; border-bottom: 1.7px solid #000; width: 250px; margin: 0 0px; vertical-align: bottom; }
+            h3 { border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 5px; }
         }
     </style>
 </head>
@@ -97,11 +100,12 @@
 </div>
 
 <div id="worksheet" class="container print-only hidden">
-    <h2>英検準1級をひとつひとつわかりやすく。2章 名詞</h2>
+    <h2>英検準1級 2章 名詞 ワークシート</h2>
     <div id="ws-content"></div>
 </div>
 
 <script>
+// --- Data ---
 const p1Data = [
     {q:"mobile", a:"mobility", t:"流動性、可動性"}, {q:"cruel", a:"cruelty", t:"残酷さ"},
     {q:"sensitive", a:"sensitivity", t:"感度、感受性"}, {q:"absent", a:"absence", t:"不在、欠席"},
@@ -196,10 +200,20 @@ const p5Extra = [
     {q:"deploy", a:"配置する、展開する", c:["撤去する","採用する","説明する"]},
     {q:"invoice", a:"請求書、送り状", c:["借方","名簿","目録"]}
 ];
-const p5Data = [...p3Data, ...p5Extra].sort(() => Math.random() - 0.5);
+const p5Data = [...p3Data, ...p5Extra]; // 初期はシャッフルしない
 
 // --- Logic ---
 let curP = 1, curI = 0, score = 0, curL = [], ansd = false;
+
+// フィッシャー・イェーツのシャッフルアルゴリズム
+function shuffle(array) {
+    let a = [...array];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
 
 function speak(txt) {
     window.speechSynthesis.cancel();
@@ -210,8 +224,9 @@ function speak(txt) {
 
 function speakCurrentWord() {
     if (curL[curI]) {
-        let text = (curP === 4) ? curL[curI].a : curL[curI].q;
-        speak(text);
+        // Part 4は読み上げない（ボタンも非表示だが念のため）
+        if (curP === 4) return;
+        speak(curL[curI].q);
     }
 }
 
@@ -219,16 +234,22 @@ function showPart(p) {
     curP = p; curI = 0; score = 0;
     document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === p-1));
     document.querySelectorAll('.part-content').forEach(c => c.classList.add('hidden'));
-    curL = [null, p1Data, p2Data, p3Data, p4Data, p5Data][p];
     
-    if (p === 1) { 
-        document.getElementById('input-container').classList.remove('hidden'); 
-        loadIn(); 
-    } else { 
-        document.getElementById('choice-container').classList.remove('hidden'); 
-        document.getElementById('spk-btn').style.display = (p >= 3) ? "flex" : "none";
-        loadCh(); 
-    }
+    // データ読み込み（Part 5のみ初期シャッフル）
+    if (p === 5) curL = shuffle([...p5Data]);
+    else curL = [null, p1Data, p2Data, p3Data, p4Data, p5Data][p];
+    
+    // スピーカーボタンの表示制御（Part 4は常に非表示）
+    const spk = document.getElementById('spk-btn');
+    if (p === 3 || p === 5) spk.style.display = "flex";
+    else spk.style.display = "none";
+
+    const qDisp = document.getElementById('ch-q');
+    if (p === 4) qDisp.classList.add('left-align');
+    else qDisp.classList.remove('left-align');
+
+    if (p === 1) { document.getElementById('input-container').classList.remove('hidden'); loadIn(); }
+    else { document.getElementById('choice-container').classList.remove('hidden'); loadCh(); }
 }
 
 function loadIn() {
@@ -259,16 +280,17 @@ function loadCh() {
     document.getElementById('ch-progress').innerText = `${curI + 1} / ${curL.length}`;
     const qDisp = document.getElementById('ch-q');
     if (curP === 4) {
-        qDisp.classList.add('left-align');
         qDisp.innerHTML = `<b>Question:</b><br>${d.q}`;
     } else {
-        qDisp.classList.remove('left-align');
         qDisp.innerHTML = d.q;
     }
     document.getElementById('q-feedback').classList.add('hidden');
     document.getElementById('ch-next-btn').classList.add('hidden');
     const cont = document.getElementById('ch-choices'); cont.innerHTML = "";
-    const choices = [d.a, ...d.c].sort(() => Math.random() - 0.5);
+    
+    // 選択肢を毎回シャッフル
+    const choices = shuffle([d.a, ...d.c]);
+    
     choices.forEach(c => {
         const btn = document.createElement('button'); btn.className = "choice-btn"; btn.innerText = c;
         btn.onclick = () => {
@@ -304,14 +326,14 @@ function showRes() {
 
 function sendEmail() {
     const email = "tamaki@eigostudio-stepforward.com";
-    const sub = encodeURIComponent(`英検準1級をひとつひとつわかりやすく。2章 名詞 Part${curP} 結果報告`);
-    const body = encodeURIComponent(`Part: ${curP}\nScore: ${score} / ${curL.length}\n全問やり切りました！`);
+    const sub = encodeURIComponent(`英検準1級 名詞 学習報告 Part${curP}`);
+    const body = encodeURIComponent(`Part: ${curP}\nScore: ${score} / ${curL.length}\n頑張りました！`);
     window.location.href = `mailto:${email}?subject=${sub}&body=${body}`;
 }
 
 window.onbeforeprint = () => {
     const ws = document.getElementById('ws-content'); ws.innerHTML = "";
-    const h1 = document.createElement('h3'); h1.innerText = "■ Part 1: Derivative Nouns (名詞形を書きなさい)"; ws.appendChild(h1);
+    const h1 = document.createElement('h3'); h1.innerText = "■ Part 1: Derivative Nouns (名詞に変えなさい)"; ws.appendChild(h1);
     p1Data.forEach((d, i) => {
         const div = document.createElement('div'); div.className="worksheet-item";
         div.innerHTML = `${i+1}. ${d.q} → <span class="blank-line"></span> (${d.t})`; ws.appendChild(div);
@@ -319,7 +341,8 @@ window.onbeforeprint = () => {
     const h4 = document.createElement('h3'); h4.innerText = "■ Part 4: Sentence Completion (空欄を埋めなさい)"; ws.appendChild(h4);
     p4Data.forEach((d, i) => {
         const div = document.createElement('div'); div.className="worksheet-item";
-        div.innerHTML = `${i+1}. ${d.q.replace("( )", "________________________________")}<br>Choices: [ ${[d.a, ...d.c].join(", ")} ]`; ws.appendChild(div);
+        const shuffledChoices = shuffle([d.a, ...d.c]);
+        div.innerHTML = `${i+1}. ${d.q.replace("( )", "________________________________")}<br>Choices: [ ${shuffledChoices.join(", ")} ]`; ws.appendChild(div);
     });
 };
 
