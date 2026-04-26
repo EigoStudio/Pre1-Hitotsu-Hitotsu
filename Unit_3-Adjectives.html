@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>英検準1級をひとつひとつわかりやすく。3章 形容詞</title>
+    <style>
+        :root {
+            --bg-color: #f7f9fc;
+            --primary-navy: #2c3e50;
+            --accent-blue: #3498db;
+            --text-dark: #34495e;
+            --white: #ffffff;
+            --success-green: #27ae60;
+            --error-red: #e74c3c;
+            --base-font: "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
+        }
+
+        body { font-family: var(--base-font); background-color: var(--bg-color); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; color: var(--text-dark); }
+        header { background-color: var(--primary-navy); color: white; width: 100%; padding: 15px 0; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        
+        .tabs { display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; justify-content: center; padding: 0 10px; }
+        .tab-btn { padding: 8px 12px; border: none; background: #bdc3c7; color: #000; cursor: pointer; border-radius: 5px 5px 0 0; font-weight: bold; font-size: 0.8rem; transition: 0.3s; }
+        .tab-btn.active { background: var(--white); color: var(--primary-navy); border-top: 3px solid var(--accent-blue); }
+
+        .container { max-width: 800px; width: 95%; background: var(--white); padding: 25px; border-radius: 0 0 20px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 40px; }
+        .hidden { display: none; }
+
+        .instruction { font-size: 0.9rem; color: #7f8c8d; margin-bottom: 15px; text-align: center; font-weight: bold; }
+        .word-display { font-size: 1.8rem; font-weight: bold; color: var(--primary-navy); margin-bottom: 20px; text-align: center; }
+        .sentence-display { text-align: left; font-size: 1.1rem; line-height: 1.8; margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 10px; border-left: 5px solid var(--accent-blue); }
+        
+        .choices-grid { display: grid; gap: 12px; }
+        .grid-2x2 { grid-template-columns: 1fr 1fr; }
+        .grid-3x1 { grid-template-columns: 1fr 1fr 1fr; }
+        
+        .choice-btn { background: var(--white); border: 2px solid #ecf0f1; padding: 15px; border-radius: 12px; font-size: 1rem; cursor: pointer; font-weight: bold; transition: 0.2s; color: var(--text-dark); }
+        .choice-btn:hover { border-color: var(--accent-blue); background: #f0f7ff; }
+        .choice-btn.correct { background: var(--success-green) !important; color: white; border-color: var(--success-green); }
+        .choice-btn.wrong { background: var(--error-red) !important; color: white; border-color: var(--error-red); }
+
+        input[type="text"] { font-size: 1.4rem; padding: 12px; width: 85%; border: 2px solid #bdc3c7; border-radius: 8px; text-align: center; display: block; margin: 0 auto 15px; outline: none; }
+        
+        .feedback-box { margin-top: 20px; padding: 15px; border-radius: 10px; background: #f1f8e9; border-left: 5px solid var(--success-green); text-align: left; }
+        .etymology { font-size: 0.85rem; color: #555; background: #fff3e0; padding: 10px; border-radius: 8px; margin-top: 10px; line-height: 1.4; }
+
+        .action-btn { background: var(--primary-navy); color: white; border: none; padding: 16px; border-radius: 30px; cursor: pointer; margin-top: 15px; width: 100%; font-weight: bold; font-size: 1.1rem; }
+        .speaker-btn { background: #e1f5fe; border: 2px solid #03a9f4; color: #03a9f4; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; width: 100%; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        
+        .blank-space { color: var(--accent-blue); font-weight: bold; text-decoration: underline; padding: 0 5px; }
+
+        /* 印刷用設定 */
+        @media print {
+            body { background: white; }
+            header, .tabs, #main-container, .action-btn, #result-screen { display: none !important; }
+            #worksheet { display: block !important; width: 100%; color: black; border:none; box-shadow:none; padding: 0; margin: 0; }
+            .ws-item { margin-bottom: 20px; padding-bottom: 5px; page-break-inside: avoid; }
+            
+            /* ナンバーより右にインデント（ぶら下げインデント） */
+            .ws-q { 
+                font-size: 1.1rem; 
+                line-height: 1.6; 
+                margin-bottom: 8px; 
+                padding-left: 2em; 
+                text-indent: -2em; 
+            }
+            
+            /* 選択肢のインデント */
+            .ws-choices { 
+                display: flex; 
+                flex-wrap: wrap;
+                gap: 5px 30px; 
+                font-weight: normal; 
+                font-size: 1rem; 
+                padding-left: 2.5em; /* 問題文よりさらに少し右から開始 */
+            }
+            .print-title { border-bottom: 2px solid black; padding-bottom: 5px; margin-bottom: 20px; font-size: 1.5rem; }
+        }
+        #worksheet { display: none; }
+    </style>
+</head>
+<body>
+
+<header><h1>英検準1級をひとつひとつわかりやすく。3章 形容詞</h1></header>
+
+<div class="tabs">
+    <button class="tab-btn active" onclick="showPart(1)">P1: 意味選択</button>
+    <button class="tab-btn" onclick="showPart(2)">P2: 接辞解説</button>
+    <button class="tab-btn" onclick="showPart(3)">P3: 派生語タイピング</button>
+    <button class="tab-btn" onclick="showPart(4)">P4: 感情分類</button>
+    <button class="tab-btn" onclick="showPart(5)">P5: 実戦穴埋め</button>
+    <button class="tab-btn" onclick="showPart(6)">P6: 総復習</button>
+</div>
+
+<div id="main-container" class="container">
+    <div id="progress" class="instruction"></div>
+    <div id="instr" class="instruction"></div>
+    <div id="display-text" class="word-display"></div>
+    <div id="choices-area" class="choices-grid"></div>
+    <div id="input-area" class="hidden">
+        <input type="text" id="type-box" placeholder="答えを入力..." autocomplete="off">
+        <div id="type-feedback" style="text-align:center; font-weight:bold; margin-bottom:10px;"></div>
+    </div>
+    <div id="feedback-area" class="feedback-box hidden">
+        <button id="spk-btn" class="speaker-btn">🔊 Listen (English Only)</button>
+        <div id="expl-text"></div>
+    </div>
+    <button id="check-btn" class="action-btn hidden" onclick="checkInput()">Check Answer</button>
+    <button id="next-btn" class="action-btn hidden" onclick="handleNext()">Next Question</button>
+</div>
+
+<div id="worksheet" class="container">
+    <h2 class="print-title">英検準1級をひとつひとつわかりやすく。3章 形容詞</h2>
+    <div id="ws-content"></div>
+</div>
+
+<div id="result-screen" class="container hidden" style="text-align:center;">
+    <h2>Well Done!</h2>
+    <p style="font-size: 2.5rem; color: var(--accent-blue);" id="final-score"></p>
+    <button class="action-btn" onclick="location.reload()">最初からリプレイ</button>
+</div>
+
+<script>
+// データ部分は前回の内容を継承（修正済みのp5Dataを含む）
+const p1Data = [
+    {q:"sensible", a:"分別のある", c:["敏感な","素晴らしい"]}, {q:"sensitive", a:"敏感な", c:["分別のある","素晴らしい"]},
+    {q:"sensational", a:"素晴らしい", c:["分別のある","敏感な"]}, {q:"unanimous", a:"満場一致の", c:["匿名の","関連のある"]},
+    {q:"anonymous", a:"匿名の", c:["満場一致の","理解可能な"]}, {q:"hostile", a:"敵意を持った", c:["もてなしの厚い","文学的な"]},
+    {q:"hospitable", a:"もてなしが厚い", c:["敵意を持った","気が進まない"]}, {q:"reluctant", a:"気が進まない", c:["余分な","文字通りの"]},
+    {q:"redundant", a:"余分な", c:["文字通りの","文学的な"]}, {q:"relevant", a:"関連性がある", c:["理解可能な","包括的な"]},
+    {q:"comprehensive", a:"包括的な", c:["理解可能な","文字通りの"]}, {q:"comprehensible", a:"理解可能な", c:["包括的な","文学的な"]},
+    {q:"literal", a:"文字通りの", c:["文学的な","読み書きのできる"]}, {q:"literary", a:"文学的な", c:["読み書きのできる","文字通りの"]},
+    {q:"literate", a:"読み書きのできる", c:["文字通りの","文学的な"]}
+];
+
+const p2Data = [
+    {q:"multicultural", a:"多文化的な", c:["包括的な","早まった"], ex:"multicultural society", d:"multi (多くの) + cultural (文化的な)"},
+    {q:"illogical", a:"非論理的な", c:["包括的な","成熟前の"], ex:"illogical argument", d:"il (否定) + logic (論理) + al"},
+    {q:"exclusive", a:"排他的な", c:["包括的な","価値のある"], ex:"exclusive club", d:"ex (外へ) + clus (閉じる) = 他者を外に閉め出す"},
+    {q:"inclusive", a:"包括的な", c:["排他的な","危険な"], ex:"inclusive society", d:"in (中へ) + clus (閉じる) = 全員を中に入れる"},
+    {q:"invaluable", a:"非常に価値のある", c:["価値のない","論理的な"], ex:"invaluable experience", d:"in (強意) + value (価値) = 価値が付けられないほど高い"},
+    {q:"premature", a:"早まった", c:["文字通りの","読み書きできる"], ex:"premature decision", d:"pre (前) + mature (成熟) = 熟す前"},
+    {q:"perilous", a:"危険な", c:["多文化の","論理的な"], ex:"perilous journey", d:"peril (危険) + ous (性質)"}
+];
+
+const p3Data = [
+    {q:"convince", a:"convincing", t:"説得力のある"}, {q:"convince", a:"convinced", t:"(人が)確信している"},
+    {q:"disturb", a:"disturbing", t:"(状況が)不安にさせる"}, {q:"disturb", a:"disturbed", t:"(人が)動揺した"},
+    {q:"press", a:"pressing", t:"差し迫った"}, {q:"press", a:"pressed", t:"(金銭等に)窮している"},
+    {q:"distract", a:"distracting", t:"気を散らす"}, {q:"distract", a:"distracted", t:"(人が)取り乱した"}
+];
+
+const p4Data = [
+    {q:"magnificent", a:"Positive", c:["Negative"], t:"壮大な", ex:"a magnificent view", d:"壮大で素晴らしい様子。"},
+    {q:"luxurious", a:"Positive", c:["Negative"], t:"豪華な", ex:"a luxurious hotel", d:"豪華で贅沢な様子。"},
+    {q:"sacred", a:"Positive", c:["Negative"], t:"神聖な", ex:"a sacred place", d:"神聖で侵してはならない場所。"},
+    {q:"noble", a:"Positive", c:["Negative"], t:"気品のある", ex:"a noble character", d:"気品のある人柄。高貴な血筋や品格を感じさせる様子。"},
+    {q:"stale", a:"Negative", c:["Positive"], t:"古くなった", ex:"stale bread", d:"新鮮さを失い、古くなった状態。"},
+    {q:"outdated", a:"Negative", c:["Positive"], t:"時代遅れの", ex:"outdated method", d:"日付を過ぎた、時代遅れな。"},
+    {q:"rotten", a:"Negative", c:["Positive"], t:"腐った", ex:"rotten eggs", d:"腐敗した、質の悪い。"},
+    {q:"rusty", a:"Negative", c:["Positive"], t:"さびた", ex:"rusty nails", d:"さびついた、古びた。"}
+];
+
+const p5Data = [
+    {q:"Tokyo is known as a ( ) city where people from all over the world live together.", a:"multicultural", c:["hostile","reluctant","anonymous"], d:"multi(多くの)文化が混ざり合う。"},
+    {q:"I'm happy to say that the decision was ( ). Everyone agrees that we should go forward with this plan.", a:"unanimous", c:["dismissed","vetoed","suspicious"], d:"全員が同じ意見(一つの心)。"},
+    {q:"Those clouds look ( ) and they could bring a storm. I think we should postpone the climb to the summit. There is no room for error on this mountain.", a:"ominous", c:["fluffy","novel","detrimental"], d:"不吉な予感。"},
+    {q:"I have a problem with the argument you have presented. The facts are not consistent with the conclusion, and your reasoning is ( ).", a:"illogical", c:["illegible","illicit","illiterate"], d:"論理的でない。"},
+    {q:"Those who wish to be the first generation of people to inhabit Mars must prepare to live in an environment a lot more ( ) than that of the Earth.", a:"hostile", c:["premature","literal","redundant"], d:"敵対的な、厳しい環境。"},
+    {q:"A: The doctor prescribed so many medications, but none of them work.<br>B: Yeah. I'm afraid those are not very ( ) for your symptoms.", a:"effective", c:["comprehensive","edible","competent"], d:"効果的な。"},
+    {q:"Eric, would you turn down the volume of your computer game? I'm trying to work here and it's very ( ).", a:"distracting", c:["uplifting","forthcoming","appetizing"], d:"気を散らす。"},
+    {q:"The judge ( ) the case because there was not enough evidence.", a:"dismissed", c:["vetoed","unanimous","suspicious"], d:"棄却する。"},
+    {q:"The ( ) meaning of the word 'heart' is an organ, while its metaphorical meaning is love.", a:"literal", c:["literary","literate","anonymous"], d:"文字通りの意味。"},
+    {q:"The CEO gave a ( ) explanation of the new strategy that covered every single detail.", a:"comprehensive", c:["comprehensible","literal","anonymous"], d:"包括的な。"},
+    {q:"The government was criticized for its ( ) spending on projects that were not necessary.", a:"redundant", c:["sensible","literate","reluctant"], d:"余分な。"},
+    {q:"The ancient temple is considered a ( ) site and tourists must follow strict rules.", a:"sacred", c:["stale","rusty","outdated"], d:"神聖な。"},
+    {q:"She was ( ) to accept the job because it required her to move to another country.", a:"reluctant", c:["hospitable","sensational","hostile"], d:"気が進まない。"},
+    {q:"This manual is written in simple English, making it ( ) to everyone.", a:"comprehensible", c:["comprehensive","literary","anonymous"], d:"理解可能な。"},
+    {q:"The witness chose to remain ( ) because they were afraid of revenge.", a:"anonymous", c:["unanimous","relevant","hospitable"], d:"匿名の。"},
+    {q:"I found his argument very ( ) because he provided a lot of evidence.", a:"convincing", c:["disturbing","pressing","distracted"], d:"説得力のある。"},
+    {q:"The news of the scandal was ( ) and it appeared on every front page.", a:"sensational", c:["sensible","sensitive","literate"], d:"素晴らしい、世間を驚かす。"},
+    {q:"The city is famous for its ( ) palaces and beautiful canals.", a:"magnificent", c:["rotten","stale","rusty"], d:"壮大な、素晴らしい。"},
+    {q:"A ( ) decision is required immediately to prevent the virus from spreading.", a:"pressing", c:["pressed","distracted","distracting"], d:"差し迫った、緊急の。"},
+    {q:"Please make sure your essay is ( ) to the topic we discussed in class.", a:"relevant", c:["literary","literal","redundant"], d:"関連のある。"},
+    {q:"I was very ( ) when I heard the loud noise coming from the basement.", a:"disturbed", c:["disturbing","pressing","pressed"], d:"動揺している。"},
+    {q:"The local people were very ( ) and offered us free food and a place to stay.", a:"hospitable", c:["hostile","reluctant","anonymous"], d:"もてなしの厚い。"},
+    {q:"It is important for parents to be ( ) to their children's emotional needs.", a:"sensitive", c:["sensible","sensational","literal"], d:"敏感な。"},
+    {q:"The abandoned house was full of ( ) pipes and broken windows.", a:"rusty", c:["noble","luxurious","sacred"], d:"さびた。"},
+    {q:"The milk has gone ( ) because it was left out for too long.", a:"stale", c:["sacred","noble","magnificent"], d:"古くなった。"},
+    {q:"The president ( ) the new bill, preventing it from becoming a law.", a:"vetoed", c:["dismissed","unanimous","suspicious"], d:"拒否した。"},
+    {q:"Smoking is ( ) to your health and can cause serious diseases.", a:"detrimental", c:["effective","competent","edible"], d:"有害な。"},
+    {q:"The police found ( ) drugs in the car and arrested the driver.", a:"illicit", c:["illogical","illiterate","illegible"], d:"不法な。"},
+    {q:"The handwriting on the old letter was almost ( ), so I couldn't read it.", a:"illegible", c:["illiterate","illicit","illogical"], d:"判読できない。"},
+    {q:"In some countries, many people are still ( ) and cannot read or write.", a:"illiterate", c:["literal","literary","literate"], d:"読み書きできない。"},
+    {q:"The suspect's behavior was very ( ), so the police followed him.", a:"suspicious", c:["unanimous","vetoed","dismissed"], d:"疑わしい。"},
+    {q:"This fruit is not ( ) yet because it hasn't turned red.", a:"edible", c:["competent","effective","comprehensive"], d:"食べられる。"},
+    {q:"She is a very ( ) teacher who motivates her students.", a:"competent", c:["effective","edible","comprehensive"], d:"有能な。"},
+    {q:"The ( ) hotel has a private beach and three swimming pools.", a:"luxurious", c:["stale","rotten","rusty"], d:"豪華な。"},
+    {q:"The old man had a ( ) character that everyone respected.", a:"noble", c:["stale","rusty","rotten"], d:"気品のある。"},
+    {q:"Be careful not to step on any ( ) nails at the construction site.", a:"rusty", c:["luxurious","magnificent","noble"], d:"さびた。"},
+    {q:"I was so ( ) by the music that I forgot the time.", a:"distracted", c:["distracting","pressing","pressed"], d:"気を取られた。"},
+    {q:"The deadline is tomorrow, so we are ( ) for time.", a:"pressed", c:["pressing","disturbing","disturbed"], d:"窮している。"},
+    {q:"I'm ( ) that this is the best solution for our company.", a:"convinced", c:["convincing","disturbing","disturbed"], d:"確信している。"},
+    {q:"He is a ( ) scholar who has written many books on history.", a:"literary", c:["literal","literate","literary"], d:"文学の。"},
+    {q:"It was very ( ) of you to save money for your future.", a:"sensible", c:["sensitive","sensational","literal"], d:"分別がある。"}
+];
+
+const p6Data = p1Data.concat([
+    {q:"dismissed", a:"棄却された", c:["満場一致の","有害な"]}, {q:"vetoed", a:"拒絶された", c:["疑わしい","不法な"]},
+    {q:"suspicious", a:"疑わしい", c:["匿名の","関連のある"]}, {q:"detrimental", a:"有害な", c:["効果的な","食べられる"]},
+    {q:"illegible", a:"判読できない", c:["読み書きできない","不法な"]}, {q:"illicit", a:"不法な", c:["拒否された","不吉な"]},
+    {q:"illiterate", a:"読み書きできない", c:["文字通りの","判読できない"]}, {q:"competent", a:"有能な", c:["効果的な","食べられる"]},
+    {q:"uplifting", a:"励みになる", c:["気を散らす","食欲をそそる"]}
+]);
+
+// ロジック
+let curP = 1, curI = 0, score = 0, curL = [], ansd = false;
+
+function shuffle(array) {
+    let a = [...array];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function speakEnglishOnly(txt) {
+    window.speechSynthesis.cancel();
+    let englishText = txt.replace(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/g, "").trim();
+    englishText = englishText.replace(/\(.*?\)/g, "").replace(/<.*?>/g, "");
+    if (englishText.length > 0) {
+        let u = new SpeechSynthesisUtterance(englishText);
+        u.lang = "en-US"; u.rate = 0.9;
+        window.speechSynthesis.speak(u);
+    }
+}
+
+function showPart(p) {
+    curP = p; curI = 0; score = 0;
+    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === p-1));
+    curL = [null, p1Data, p2Data, p3Data, p4Data, p5Data, p6Data][p];
+    if (p >= 5) curL = shuffle(curL);
+    loadQuestion();
+}
+
+function loadQuestion() {
+    ansd = false;
+    const d = curL[curI];
+    document.getElementById('progress').innerText = `${curI + 1} / ${curL.length}`;
+    document.getElementById('feedback-area').classList.add('hidden');
+    document.getElementById('next-btn').classList.add('hidden');
+    document.getElementById('display-text').classList.remove('sentence-display');
+    const choicesCont = document.getElementById('choices-area');
+    const inputCont = document.getElementById('input-area');
+    const checkBtn = document.getElementById('check-btn');
+    choicesCont.innerHTML = "";
+    choicesCont.classList.add('hidden');
+    inputCont.classList.add('hidden');
+    checkBtn.classList.add('hidden');
+
+    if (curP === 3) {
+        document.getElementById('instr').innerText = "和訳に合う形をタイピングしなさい。";
+        document.getElementById('display-text').innerHTML = `${d.q} <span style="font-size:1rem; color:#666;">(${d.t})</span>`;
+        inputCont.classList.remove('hidden');
+        checkBtn.classList.remove('hidden');
+        document.getElementById('type-feedback').innerText = "";
+        document.getElementById('type-box').value = "";
+        document.getElementById('type-box').disabled = false;
+        document.getElementById('type-box').focus();
+    } else {
+        document.getElementById('instr').innerText = (curP === 5) ? "空欄に合う単語を選びなさい。" : "正しい答えを選びなさい。";
+        choicesCont.classList.remove('hidden');
+        choicesCont.className = "choices-grid " + (curP === 1 ? "grid-3x1" : "grid-2x2");
+        if (curP === 5) {
+            document.getElementById('display-text').classList.add('sentence-display');
+            document.getElementById('display-text').innerHTML = d.q.replace("( )", `(<span id="blank" class="blank-space">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>)`);
+        } else {
+            document.getElementById('display-text').innerText = d.q;
+        }
+        shuffle([d.a, ...d.c]).forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = "choice-btn";
+            btn.innerText = c;
+            btn.onclick = () => selectChoice(c, btn);
+            choicesCont.appendChild(btn);
+        });
+    }
+}
+
+function selectChoice(choice, btn) {
+    if (ansd) return; ansd = true;
+    const d = curL[curI];
+    if (curP === 5) document.getElementById('blank').innerText = choice;
+    if (choice === d.a) {
+        btn.classList.add('correct'); score++;
+        showFeedback(true);
+    } else {
+        btn.classList.add('wrong');
+        showFeedback(false);
+    }
+}
+
+function checkInput() {
+    const v = document.getElementById('type-box').value.trim().toLowerCase();
+    const d = curL[curI];
+    if (v === d.a.toLowerCase()) {
+        score++; ansd = true;
+        document.getElementById('type-feedback').innerHTML = `<span style="color:var(--success-green)">Correct!</span>`;
+        document.getElementById('type-box').disabled = true;
+        document.getElementById('check-btn').classList.add('hidden');
+        showFeedback(true);
+    } else {
+        document.getElementById('type-feedback').innerHTML = `<span style="color:var(--error-red)">Try again!</span>`;
+    }
+}
+
+function showFeedback(isCorrect) {
+    const d = curL[curI];
+    const fbArea = document.getElementById('feedback-area');
+    const expl = document.getElementById('expl-text');
+    const spk = document.getElementById('spk-btn');
+    let html = isCorrect ? `<b>✨ Correct!</b>` : `<b>❌ Incorrect.</b> 正解: <b>${d.a}</b>`;
+    if (d.t) html += `<br>和訳: ${d.t}`;
+    if (d.ex) html += `<br><span style="color:var(--accent-blue); font-weight:bold;">Example: ${d.ex}</span>`;
+    if (d.d) html += `<div class="etymology">${d.d}</div>`;
+    expl.innerHTML = html;
+    fbArea.classList.remove('hidden');
+    document.getElementById('next-btn').classList.remove('hidden');
+    spk.onclick = () => {
+        if (curP === 5) speakEnglishOnly(d.q.replace("( )", d.a));
+        else if (d.ex) speakEnglishOnly(d.ex);
+        else if (curP === 3) speakEnglishOnly(d.a);
+        else if (d.q && isNaN(d.q)) speakEnglishOnly(d.q);
+        else speakEnglishOnly(d.a);
+    };
+}
+
+function handleNext() {
+    curI++;
+    if (curI < curL.length) loadQuestion();
+    else showRes();
+}
+
+function showRes() {
+    document.getElementById('main-container').classList.add('hidden');
+    document.getElementById('result-screen').classList.remove('hidden');
+    document.getElementById('final-score').innerText = `${score} / ${curL.length}`;
+}
+
+window.onbeforeprint = () => {
+    const ws = document.getElementById('ws-content');
+    ws.innerHTML = "";
+    p5Data.forEach((d, i) => {
+        const item = document.createElement('div');
+        item.className = "ws-item";
+        const choices = shuffle([d.a, ...d.c]);
+        const choiceLabels = choices.map((c, idx) => `${idx + 1}. ${c}`);
+        item.innerHTML = `
+            <div class="ws-q">${i + 1}. ${d.q.replace("( )", "________________")}</div>
+            <div class="ws-choices">${choiceLabels.join("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")}</div>
+        `;
+        ws.appendChild(item);
+    });
+};
+
+window.onload = () => showPart(1);
+</script>
+</body>
+</html>
